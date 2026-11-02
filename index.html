@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#090910">
+<title>NOVA TV — عالم الترفيه</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+:root{--bg:#090910;--panel:#151522;--panel2:#1d1b2c;--purple:#8b5cf6;--pink:#d946ef;--muted:#aaa7bb;--white:#f7f5ff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--white);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+button,input{font:inherit}button{cursor:pointer;color:inherit;border:0}
+.topbar{height:70px;display:flex;align-items:center;gap:22px;padding:0 5%;position:sticky;top:0;z-index:20;background:#090910eF;backdrop-filter:blur(18px);border-bottom:1px solid #ffffff12}
+.logo{font-weight:950;letter-spacing:2px;font-size:25px;background:linear-gradient(90deg,#fff,#b69aff,#e879f9);color:transparent;background-clip:text}
+.nav{display:flex;gap:8px;align-items:center;flex:1}.nav button,.pill{background:transparent;color:#c7c2d6;padding:10px 13px;border-radius:10px}.nav button.active,.nav button:focus-visible{background:#8b5cf626;color:white;outline:1px solid #8b5cf6}
+.actions{display:flex;gap:8px}.iconbtn{background:#ffffff12;padding:10px 13px;border-radius:12px}
+.hero{min-height:430px;padding:65px 7% 55px;display:flex;align-items:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at 20% 40%,#592e9b77,transparent 42%),linear-gradient(90deg,#090910 5%,#090910d9 45%,#09091066),linear-gradient(135deg,#211334,#11101c 55%,#321c49)}
+.hero:after{content:"NOVA";position:absolute;left:4%;bottom:-55px;font-size:clamp(130px,24vw,300px);font-weight:1000;color:#ffffff08;letter-spacing:-15px;pointer-events:none}
+.hero-content{max-width:650px;position:relative;z-index:1}.eyebrow{color:#c4a7ff;font-size:13px;letter-spacing:3px;font-weight:800}.hero h1{font-size:clamp(36px,6vw,66px);line-height:1.05;margin:14px 0}.hero p{color:#d0cbdc;max-width:540px;line-height:1.9}.primary{background:linear-gradient(110deg,var(--purple),var(--pink));padding:13px 22px;border-radius:12px;font-weight:800;box-shadow:0 8px 30px #8b5cf633}.secondary{background:#ffffff18;padding:13px 20px;border-radius:12px;margin-inline-start:8px}
+main{padding:0 5% 55px}.section-head{display:flex;align-items:center;justify-content:space-between;margin:28px 0 15px}.section-head h2{font-size:21px;margin:0}.section-head small{color:var(--muted)}
+.filters{display:flex;gap:8px;overflow:auto;padding:4px 0 15px}.filter{white-space:nowrap;background:#ffffff0d;border:1px solid #ffffff12;padding:9px 15px;border-radius:30px;color:#d6d1e2}.filter.active{background:#8b5cf633;border-color:#a78bfa;color:white}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:17px}.card{background:var(--panel);border:1px solid #ffffff0d;border-radius:15px;overflow:hidden;min-width:0;transition:.2s;cursor:pointer}.card:hover,.card:focus-visible{transform:translateY(-4px);outline:2px solid #a78bfa;box-shadow:0 12px 35px #0008}.poster{height:210px;background:linear-gradient(145deg,#34224f,#141321);display:grid;place-items:center;overflow:hidden}.poster img{width:100%;height:100%;object-fit:cover}.poster .fallback{font-size:38px;color:#c4b5fd}.card-info{padding:11px}.card-title{font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card-sub{font-size:12px;color:var(--muted);margin-top:5px}
+.empty{border:1px dashed #ffffff2c;padding:35px;border-radius:16px;text-align:center;color:var(--muted);line-height:1.9}.notice{margin:18px 0;padding:13px 16px;background:#8b5cf61a;border:1px solid #8b5cf644;border-radius:12px;color:#ddd4ff;font-size:13px}
+.search{display:none;position:fixed;inset:0;background:#000b;z-index:50;align-items:flex-start;justify-content:center;padding:12vh 18px}.search.open{display:flex}.searchbox{width:min(650px,100%);background:#171523;padding:20px;border-radius:18px}.searchbox input,.settings input{width:100%;background:#090910;border:1px solid #ffffff20;color:white;padding:13px;border-radius:10px;outline:none}
+.modal{display:none;position:fixed;inset:0;background:#000d;z-index:60;align-items:center;justify-content:center;padding:18px}.modal.open{display:flex}.modalbox{width:min(850px,100%);background:#171523;border:1px solid #ffffff1b;border-radius:18px;overflow:hidden;max-height:90vh;overflow-y:auto}.modalhead{display:flex;justify-content:space-between;align-items:center;padding:15px 18px;border-bottom:1px solid #ffffff12}.modalbody{padding:18px}.video-wrap{background:#000;aspect-ratio:16/9;display:grid;place-items:center}.video-wrap video{width:100%;height:100%}.close{background:#ffffff15;border-radius:9px;padding:8px 12px}
+.settings{display:grid;gap:12px}.settings label{font-size:13px;color:#c7c2d6}.settings small{color:var(--muted);line-height:1.6}
+footer{padding:24px 5%;border-top:1px solid #ffffff12;color:#777386;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+:focus-visible{outline:2px solid #c4b5fd;outline-offset:3px}
+@media(max-width:760px){.topbar{padding:0 15px;height:62px;gap:10px}.nav{position:fixed;bottom:0;right:0;left:0;z-index:30;background:#11101cf5;backdrop-filter:blur(16px);justify-content:space-around;padding:7px 3px calc(7px + env(safe-area-inset-bottom));border-top:1px solid #ffffff18;gap:0}.nav button{font-size:11px;padding:9px 7px}.actions{margin-inline-start:auto}.hero{min-height:380px;padding:50px 22px}.hero:after{font-size:120px;bottom:-20px;left:0}main{padding:0 16px 95px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.poster{height:190px}.section-head{margin-top:23px}.secondary{margin-inline-start:4px}}
+@media(min-width:761px) and (max-width:1050px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">NOVA TV</div>
+  <nav class="nav" aria-label="التنقل">
+    <button class="active" data-page="home">الرئيسية</button>
+    <button data-page="channels">مباشر</button>
+    <button data-page="movies">أفلام</button>
+    <button data-page="series">مسلسلات</button>
+    <button data-page="favorites">المفضلة</button>
+  </nav>
+  <div class="actions">
+    <button class="iconbtn" id="searchOpen" aria-label="بحث">⌕</button>
+    <button class="iconbtn" id="settingsOpen" aria-label="الإعدادات">⚙</button>
+  </div>
+</header>
+<section class="hero" id="hero">
+ <div class="hero-content">
+  <div class="eyebrow">YOUR ENTERTAINMENT UNIVERSE</div>
+  <h1>عالمك…<br>على شاشة واحدة.</h1>
+  <p>قنوات مباشرة، أفلام ومسلسلات في تجربة سينمائية واحدة. اكتشف محتواك المفضل واستمتع بالمشاهدة على الهاتف والتلفزيون.</p>
+  <button class="primary" id="heroLive">▶ استكشف القنوات</button>
+  <button class="secondary" id="heroMovies">اكتشف الأفلام</button>
+ </div>
+</section>
+<main>
+ <div class="notice" id="connectionNotice">وضع العرض التجريبي: اربط بيانات Supabase من الإعدادات لعرض محتواك الحقيقي. أضف فقط روابط وصور المحتوى الذي تملك حق استخدامه.</div>
+ <section id="contentArea">
+  <div class="section-head"><h2 id="sectionTitle">مختار لك</h2><small id="itemCount">0 عنصر</small></div>
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+ </section>
+</main>
+<footer><span>© NOVA TV — تجربة بث سينمائية</span><span>للمحتوى المرخّص والمصرّح بتوزيعه فقط</span></footer>
+
+<div class="search" id="searchLayer"><div class="searchbox"><div class="modalhead"><b>ابحث في NOVA TV</b><button class="close" id="searchClose">إغلاق</button></div><input id="searchInput" placeholder="اسم قناة أو فيلم أو مسلسل..." autocomplete="off"></div></div>
+
+<div class="modal" id="settingsLayer"><div class="modalbox"><div class="modalhead"><b>إعدادات الاتصال</b><button class="close" data-close="settingsLayer">إغلاق</button></div><div class="modalbody settings">
+ <p>أدخل رابط مشروعك ومفتاح Publishable من Supabase. لا تضع كلمة مرور قاعدة البيانات أو service_role key هنا.</p>
+ <label>Supabase Project URL<input id="projectUrl" value="https://xvljutxlhlyibwhstwrr.supabase.co" dir="ltr"></label>
+ <label>Publishable key<input id="publishableKey" placeholder="sb_publishable_..." dir="ltr" autocomplete="off"></label>
+ <small>المفتاح Publishable مخصص للاستخدام من الواجهة. حماية البيانات تعتمد أيضاً على سياسات RLS في قاعدة البيانات.</small>
+ <button class="primary" id="saveConfig">حفظ والاتصال</button><button class="secondary" id="clearConfig">مسح بيانات الاتصال</button>
+ <div id="connectionStatus" role="status"></div>
+ </div></div></div>
+
+<div class="modal" id="playerLayer"><div class="modalbox"><div class="modalhead"><b id="playerTitle">المشغل</b><button class="close" data-close="playerLayer">إغلاق</button></div><div class="video-wrap"><video id="video" controls playsinline></video></div><div class="modalbody"><p id="playerDescription">استخدم فقط رابط بث تملك حق مشاهدته أو توزيعه.</p></div></div></div>
+<script>
+const $=s=>document.querySelector(s);
+let supabaseClient=null, allItems=[], currentPage='home', currentFilter='الكل';
+const categories={channels:['الكل','أخبار','رياضة','ترفيه','أطفال','وثائقي'],movies:['الكل','أكشن','دراما','كوميديا','وثائقي','عائلي'],series:['الكل','دراما','كوميديا','أنيميشن','وثائقي']};
+const demo=[
+ {id:'d1',name:'NOVA NEWS',category:'أخبار',type:'channel',description:'قناة تجريبية — أضف بيانات البث المرخّصة من لوحة الإدارة.',logo_url:'',stream_url:''},
+ {id:'d2',name:'NOVA SPORTS',category:'رياضة',type:'channel',description:'قناة تجريبية — لا يوجد بث مرفق.',logo_url:'',stream_url:''},
+ {id:'d3',name:'NOVA CINEMA',category:'ترفيه',type:'channel',description:'قناة تجريبية — أضف رابطاً مصرحاً به.',logo_url:'',stream_url:''}
+];
+function getSaved(key){try{return localStorage.getItem(key)||''}catch(e){return ''}}
+function setSaved(key,val){try{localStorage.setItem(key,val)}catch(e){}}
+function setupClient(){
+ const url=getSaved('nova_url'),key=getSaved('nova_key');
+ if(url&&key&&window.supabase){supabaseClient=window.supabase.createClient(url,key);$('#connectionNotice').textContent='تم إعداد بيانات الاتصال. جارٍ تحميل المحتوى من Supabase.';loadContent();}
+}
+function normalize(rows,type){return (rows||[]).map(x=>({...x,type,description:x.description||'',poster_url:x.poster_url||x.logo_url||''}));}
+async function loadContent(){
+ if(!supabaseClient){allItems=demo;render();return}
+ try{
+  const [c,m,s]=await Promise.all([
+   supabaseClient.from('channels').select('*').eq('is_active',true).order('name'),
+   supabaseClient.from('movies').select('*').eq('is_active',true).order('name'),
+   supabaseClient.from('series').select('*').eq('is_active',true).order('name')
+  ]);
+  const errors=[c.error,m.error,s.error].filter(Boolean);
+  allItems=[...normalize(c.data,'channel'),...normalize(m.data,'movie'),...normalize(s.data,'series')];
+  if(errors.length){$('#connectionNotice').textContent='تم الاتصال جزئياً. تأكد من إنشاء جدولي movies وseries وتشغيل سياسات القراءة في SQL.'}
+  else $('#connectionNotice').textContent='متصل بـ Supabase — يتم عرض المحتوى النشط من قاعدة بياناتك.';
+  render();
+ }catch(e){$('#connectionNotice').textContent='تعذر تحميل البيانات. راجع رابط المشروع والمفتاح وسياسات RLS.';allItems=demo;render()}
+}
+function pageItems(){
+ if(currentPage==='channels')return allItems.filter(x=>x.type==='channel');
+ if(currentPage==='movies')return allItems.filter(x=>x.type==='movie');
+ if(currentPage==='series')return allItems.filter(x=>x.type==='series');
+ if(currentPage==='favorites'){let ids=JSON.parse(getSaved('nova_favs')||'[]');return allItems.filter(x=>ids.includes(String(x.id)))}
+ return allItems;
+}
+function render(){
+ const titles={home:'مختار لك',channels:'القنوات المباشرة',movies:'عالم الأفلام',series:'المسلسلات',favorites:'قائمة المفضلة'};
+ $('#sectionTitle').textContent=titles[currentPage];
+ const opts=categories[currentPage]||['الكل'];
+ $('#filters').innerHTML=opts.map((v,i)=>`<button class="filter ${v===currentFilter?'active':''}" data-filter="${v}">${v}</button>`).join('');
+ let items=pageItems();
+ if(currentFilter!=='الكل'&&currentPage!=='favorites')items=items.filter(x=>x.category===currentFilter);
+ const q=$('#searchInput').value.trim().toLowerCase();if(q)items=items.filter(x=>(x.name||'').toLowerCase().includes(q)||(x.category||'').toLowerCase().includes(q));
+ $('#itemCount').textContent=items.length+' عنصر';
+ $('#grid').innerHTML=items.length?items.map(cardHTML).join(''):`<div class="empty" style="grid-column:1/-1">${currentPage==='favorites'?'لم تضف عناصر إلى المفضلة بعد.':'لا يوجد محتوى هنا حالياً.'}<br>أضف قنواتك وأفلامك ومسلسلاتك من Supabase Table Editor.</div>`;
+ $('#grid').querySelectorAll('.card').forEach(el=>{el.addEventListener('click',()=>openItem(el.dataset.id));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openItem(el.dataset.id)}})});
+ $('#filters').querySelectorAll('button').forEach(b=>b.onclick=()=>{currentFilter=b.dataset.filter;render()});
+}
+function cardHTML(x){
+ const title=esc(x.name||'بدون اسم'),cat=esc(x.category||'عام'),img=x.poster_url||x.logo_url||'';
+ return `<article class="card" tabindex="0" role="button" data-id="${esc(String(x.id))}"><div class="poster">${img?`<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="fallback">✦</span>`}</div><div class="card-info"><div class="card-title">${title}</div><div class="card-sub">${cat} · ${x.type==='channel'?'مباشر':x.type==='movie'?'فيلم':'مسلسل'}</div></div></article>`;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function openItem(id){
+ const x=allItems.find(a=>String(a.id)===String(id));if(!x)return;
+ const favs=JSON.parse(getSaved('nova_favs')||'[]'),isFav=favs.includes(String(x.id));
+ const old=$('#detailLayer');if(old)old.remove();
+ const layer=document.createElement('div');layer.className='modal open';layer.id='detailLayer';
+ layer.innerHTML=`<div class="modalbox"><div class="modalhead"><b>${esc(x.name)}</b><button class="close" id="detailClose">إغلاق</button></div><div class="modalbody"><p>${esc(x.description||'لا توجد تفاصيل إضافية.')}</p><p class="card-sub">${esc(x.category||'عام')}</p><button class="primary" id="watchItem">${x.type==='channel'?'▶ مشاهدة مباشرة':'▶ تشغيل'}</button><button class="secondary" id="favItem">${isFav?'إزالة من المفضلة':'＋ أضف للمفضلة'}</button></div></div>`;
+ document.body.appendChild(layer);$('#detailClose').onclick=()=>layer.remove();
+ $('#favItem').onclick=()=>{let f=JSON.parse(getSaved('nova_favs')||'[]');f=isFav?f.filter(v=>v!==String(x.id)):[...f,String(x.id)];setSaved('nova_favs',JSON.stringify(f));layer.remove();render()};
+ $('#watchItem').onclick=()=>{layer.remove();playItem(x)};
+ layer.onclick=e=>{if(e.target===layer)layer.remove()};
+}
+function playItem(x){
+ if(!x.stream_url){alert('لا يوجد رابط بث لهذا العنصر. أضف رابطاً مرخّصاً في Supabase أولاً.');return}
+ $('#playerTitle').textContent=x.name;$('#playerDescription').textContent=x.description||'';
+ const video=$('#video');video.pause();video.removeAttribute('src');if(video._hls){video._hls.destroy();video._hls=null}
+ const url=x.stream_url;
+ if(url.includes('.m3u8')&&window.Hls&&Hls.isSupported()){const h=new Hls();h.loadSource(url);h.attachMedia(video);video._hls=h}
+ else if(video.canPlayType('application/vnd.apple.mpegurl'))video.src=url;else video.src=url;
+ $('#playerLayer').classList.add('open');video.play().catch(()=>{});
+}
+function setPage(p){currentPage=p;currentFilter='الكل';document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p));$('#hero').style.display=p==='home'?'flex':'none';render();window.scrollTo(0,0)}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>setPage(b.dataset.page));
+$('#heroLive').onclick=()=>setPage('channels');$('#heroMovies').onclick=()=>setPage('movies');
+$('#searchOpen').onclick=()=>{$('#searchLayer').classList.add('open');$('#searchInput').focus()};
+$('#searchClose').onclick=()=>{$('#searchLayer').classList.remove('open');$('#searchInput').value='';render()};
+$('#searchInput').addEventListener('input',render);
+$('#settingsOpen').onclick=()=>$('#settingsLayer').classList.add('open');
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>$('#'+b.dataset.close).classList.remove('open'));
+$('#saveConfig').onclick=()=>{const u=$('#projectUrl').value.trim(),k=$('#publishableKey').value.trim();if(!u.startsWith('https://')||!k.startsWith('sb_publishable_')){$('#connectionStatus').textContent='تحقق من رابط المشروع ومفتاح sb_publishable_.';return}setSaved('nova_url',u);setSaved('nova_key',k);$('#connectionStatus').textContent='تم الحفظ. جارٍ الاتصال...';setupClient()};
+$('#clearConfig').onclick=()=>{setSaved('nova_url','');setSaved('nova_key','');supabaseClient=null;$('#connectionStatus').textContent='تم مسح بيانات الاتصال من هذا الجهاز.';allItems=demo;render()};
+$('#settingsLayer').addEventListener('click',e=>{if(e.target.id==='settingsLayer')e.target.classList.remove('open')});
+$('#playerLayer').addEventListener('click',e=>{if(e.target.id==='playerLayer')e.target.classList.remove('open')});
+$('#playerLayer [data-close]').onclick=()=>{const v=$('#video');v.pause();if(v._hls){v._hls.destroy();v._hls=null}$('#playerLayer').classList.remove('open')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.open,.search.open').forEach(x=>x.classList.remove('open'))}});
+// TV remote / keyboard: directional navigation between focusable cards and controls.
+document.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;const els=[...document.querySelectorAll('button:not([disabled]),.card[tabindex="0"]')].filter(x=>x.offsetParent);const i=els.indexOf(document.activeElement);if(i<0)return;let n=i+(e.key==='ArrowLeft'?-1:e.key==='ArrowRight'?1:e.key==='ArrowUp'?-3:3);if(els[n]){e.preventDefault();els[n].focus()}});
+loadContent();setupClient();
+</script>
+</body></html>
